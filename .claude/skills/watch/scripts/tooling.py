@@ -36,11 +36,12 @@ def resolve_media_binary(name: str, *, which: Which | None = None) -> str | None
 
 
 def resolve_ytdlp_command(*, which: Which | None = None) -> list[str] | None:
-    """Return a directly executable yt-dlp command, falling back to its module."""
+    """Prefer the pip-installed yt_dlp module (the one the README tells users to keep
+    updated with `python -m pip install -U yt-dlp`); fall back to a yt-dlp binary on PATH."""
+    if importlib.util.find_spec("yt_dlp") is not None:
+        return [sys.executable, "-m", "yt_dlp"]
     lookup = which or shutil.which
     candidate = lookup("yt-dlp")
     if candidate and _directly_executable(candidate):
         return [candidate]
-    if importlib.util.find_spec("yt_dlp") is not None:
-        return [sys.executable, "-m", "yt_dlp"]
     return None
