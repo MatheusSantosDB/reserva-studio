@@ -30,11 +30,12 @@ hyperframes/
 
 ```bash
 node scripts/preparar-fala.mjs <gravacao.mp4> hyperframes/projetos/<nome>/assets/fala.mp4
-node scripts/transcrever.mjs hyperframes/projetos/<nome>/assets/fala.mp4 hyperframes/projetos/<nome>/palavras.json
+node scripts/transcrever.mjs hyperframes/projetos/<nome>/assets/fala.mp4 hyperframes/projetos/<nome>/palavras.json --ate 15   # amostra
 node scripts/legenda.mjs hyperframes/projetos/<nome>/palavras.json > hyperframes/projetos/<nome>/assets/legenda.js
 ```
 
 - O `preparar-fala` deixa o vídeo em 1080×1920 30 fps, o áudio mono nos dois lados em ~−14 LUFS e corta as pausas acima de 0,16 s. Ao final, confira que nenhuma pausa passou de 0,2 s.
+- **Amostra primeiro:** transcreva só os 15 s iniciais (`--ate 15`). Em PC comum, o vídeo inteiro leva alguns minutos; transcreva tudo (sem `--ate`) só depois da amostra aprovada.
 - **Revise o `palavras.json`** antes da legenda: a transcrição erra nomes de produto (ex.: "raquetas" em vez de "jaquetas"). Para a versão final, use `--preciso`.
 - No `index.html`, ponha a duração do `fala.mp4` no `data-duration` do `#root` e do `<video>`.
 - Legenda clássica: 2 a 3 palavras, sem animação palavra por palavra, sem emoji.

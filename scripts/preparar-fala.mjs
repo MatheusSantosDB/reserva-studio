@@ -12,9 +12,21 @@ const FPS = 30;
 const MIN_CORTE = 0.16;
 const q = (t) => Math.round(t * FPS) / FPS;
 
+const EMENDA_RUIDO = 0.08; // silêncios separados por um estalo menor que isso viram uma pausa só
+
+function juntarSilencios(silencios) {
+  const out = [];
+  for (const s of [...silencios].sort((a, b) => a.inicio - b.inicio)) {
+    const ult = out[out.length - 1];
+    if (ult && s.inicio - ult.fim < EMENDA_RUIDO) ult.fim = Math.max(ult.fim, s.fim);
+    else out.push({ ...s });
+  }
+  return out;
+}
+
 export function planejarCortes(silencios, duracao) {
   const cortes = [];
-  for (const { inicio, fim } of silencios) {
+  for (const { inicio, fim } of juntarSilencios(silencios)) {
     const d = fim - inicio;
     if (d < MIN_CORTE || inicio < 0.3 || fim > duracao - 0.4) continue;
     const fica = d > 0.5 ? 0.14 : 0.1;
@@ -30,7 +42,7 @@ export function planejarCortes(silencios, duracao) {
 }
 
 function silencios(ff, arquivo) {
-  const log = spawnSync(ff, ['-hide_banner', '-nostats', '-i', arquivo, '-af', 'silencedetect=noise=-38dB:d=0.14', '-f', 'null', '-'], { encoding: 'utf8' }).stderr;
+  const log = spawnSync(ff, ['-hide_banner', '-nostats', '-i', arquivo, '-af', 'silencedetect=noise=-38dB:d=0.05', '-f', 'null', '-'], { encoding: 'utf8' }).stderr;
   const ini = [...log.matchAll(/silence_start: ([\d.]+)/g)].map((m) => Number(m[1]));
   const fim = [...log.matchAll(/silence_end: ([\d.]+)/g)].map((m) => Number(m[1]));
   const dur = log.match(/Duration: (\d+):(\d+):([\d.]+)/);
@@ -49,14 +61,17 @@ if (ehPrincipal(import.meta.url)) {
   if (n.status !== 0) process.exit(n.status ?? 1);
   const { lista, duracao } = silencios(ff, voz);
   const trechos = planejarCortes(lista, duracao);
-  const partes = trechos.map((s, i) =>
-    `[0:v]trim=start=${s.inicio}:end=${s.fim},setpts=PTS-STARTPTS[v${i}];[1:a]atrim=start=${s.inicio}:end=${s.fim},asetpts=PTS-STARTPTS[a${i}]`);
-  const juntar = trechos.map((_, i) => `[v${i}][a${i}]`).join('');
-  const filtro = `${partes.join(';')};${juntar}concat=n=${trechos.length}:v=1:a=1[v][a];`
-    + '[v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30[vo];'
-    + '[a]aformat=channel_layouts=stereo[ao]';
+  // o último trecho termina num quadro inteiro, para vídeo e áudio terem a mesma duração
+  trechos[trechos.length - 1].fim = Math.floor(trechos[trechos.length - 1].fim * FPS) / FPS;
+  // vídeo: select pelo número do quadro (um passe só, rápido e exato)
+  const manterV = trechos.map((t) => `between(n,${Math.round(t.inicio * FPS)},${Math.round(t.fim * FPS) - 1})`).join('+');
+  // áudio: atrim por trecho (exato na amostra; aselect cortaria em blocos de ~21 ms e o som escorregaria)
+  const partesA = trechos.map((t, i) => `[a${i}]atrim=start=${t.inicio.toFixed(5)}:end=${t.fim.toFixed(5)},asetpts=PTS-STARTPTS[b${i}]`);
+  const filtro = `[0:v]fps=30,select='${manterV}',setpts=N/30/TB,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[vo];`
+    + `[1:a]asplit=${trechos.length}${trechos.map((_, i) => `[a${i}]`).join('')};${partesA.join(';')};`
+    + `${trechos.map((_, i) => `[b${i}]`).join('')}concat=n=${trechos.length}:v=0:a=1,aformat=channel_layouts=stereo[ao]`;
   const r = spawnSync(ff, ['-y', '-loglevel', 'error', '-i', entrada, '-i', voz, '-filter_complex', filtro, '-map', '[vo]', '-map', '[ao]',
-    '-c:v', 'libx264', '-crf', '18', '-preset', 'medium', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', saida], { stdio: 'inherit' });
+    '-c:v', 'libx264', '-crf', '18', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', saida], { stdio: 'inherit' });
   if (r.status !== 0) process.exit(r.status ?? 1);
   const novo = trechos.reduce((s, t) => s + t.fim - t.inicio, 0);
   console.log(`Pronto: ${saida} (${duracao.toFixed(1)} s → ${novo.toFixed(1)} s, ${trechos.length - 1} pausa(s) cortada(s)).`);

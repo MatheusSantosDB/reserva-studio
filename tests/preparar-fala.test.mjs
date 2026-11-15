@@ -31,6 +31,11 @@ test('não corta silêncio do comecinho nem do finalzinho', () => {
   assert.deepEqual(planejarCortes([{ inicio: 0, fim: 0.8 }, { inicio: 9.5, fim: 10 }], 10), [{ inicio: 0, fim: 10 }]);
 });
 
+test('silêncios separados por ruído curto contam como uma pausa só', () => {
+  const t = planejarCortes([{ inicio: 3.0, fim: 3.12 }, { inicio: 3.17, fim: 3.32 }], 10);
+  assert.equal(t.length, 2, 'a pausa de 0,32 s (com um estalo no meio) devia ser cortada');
+});
+
 test('transcrever sem argumentos mostra o uso e sai com 1', () => {
   const r = spawnSync(process.execPath, ['scripts/transcrever.mjs'], { encoding: 'utf8' });
   assert.equal(r.status, 1);
