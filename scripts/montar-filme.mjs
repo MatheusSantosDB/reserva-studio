@@ -7,7 +7,8 @@
 //   "trilha": "assets/trilha.mp3",                opcional
 //   "gancho": "texto curto dos primeiros 2 s",     opcional
 //   "takes": [ { "arquivo": "assets/take1.mp4", "duracao": 3.5, "texto": "opcional" } ],
-//   "final": { "titulo": "Nome do produto", "foto": "assets/peca.png", "duracao": 3 }
+//   "final": { "titulo": "Nome do produto", "foto": "assets/peca.png", "duracao": 3, "fundo": "#efe9df" }
+//   (fundo opcional: claro por padrão; use escuro só com peça clara)
 // }
 // O código promocional vem de config/vendedor.json. Sem ele, o cartão final sai sem código.
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -34,6 +35,9 @@ export function montarFilme(spec, { cupom }) {
   });
   const final = spec.final ? { ...spec.final, inicio: t, duracao: naBatida(spec.final.duracao ?? 3, bpm) } : null;
   const duracao = t + (final ? final.duracao : 0);
+  const fundo = /^#[0-9a-f]{3,8}$/i.test(spec.final?.fundo ?? '') ? spec.final.fundo : '#efe9df';
+  const claro = (h) => { const x = h.length === 4 ? h.slice(1).split('').map((c) => c + c).join('') : h.slice(1, 7); const n = parseInt(x, 16); return ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 > 140; };
+  const corTexto = claro(fundo) ? '#111111' : '#ffffff';
 
   const videos = takes.map((k) => `<video id="take${k.i}" class="clip abs tela" src="${esc(k.arquivo)}" data-start="${n(k.inicio)}" data-duration="${n(k.duracao)}" data-media-start="0" data-track-index="0" muted playsinline></video>`);
   const textos = takes.filter((k) => k.texto).map((k) => `<div id="txt${k.i}" class="clip abs texto" data-start="${n(k.inicio + 0.2)}" data-duration="${n(k.duracao - 0.3)}" data-track-index="2">${esc(k.texto)}</div>`);
@@ -67,10 +71,10 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
 .tela{left:0;top:0;width:1080px;height:1920px;object-fit:cover}
 .gancho{left:80px;right:80px;top:300px;text-align:center;font-size:76px;font-weight:800;line-height:1.1;text-shadow:0 4px 18px rgba(0,0,0,.8);z-index:30}
 .texto{left:80px;right:80px;bottom:360px;text-align:center;font-size:58px;font-weight:700;line-height:1.15;text-shadow:0 4px 16px rgba(0,0,0,.85);z-index:20}
-.final{left:0;top:0;width:1080px;height:1920px;background:#0f1a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:48px;z-index:40}
+.final{left:0;top:0;width:1080px;height:1920px;background:${fundo};color:${corTexto};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:48px;z-index:40}
 #final-foto{max-width:720px;max-height:900px;object-fit:contain;filter:drop-shadow(0 30px 40px rgba(0,0,0,.45))}
 #final-titulo{font-size:64px;font-weight:800;text-transform:uppercase;letter-spacing:4px;text-align:center;padding:0 80px}
-${cupom ? `#cupom{display:flex;gap:20px;align-items:baseline;border:3px solid #fff;padding:20px 40px;border-radius:14px}
+${cupom ? `#cupom{display:flex;gap:20px;align-items:baseline;border:3px solid ${corTexto};padding:20px 40px;border-radius:14px}
 #cupom span{font-size:36px;letter-spacing:6px;font-weight:600}
 #cupom b{font-size:72px;font-weight:800;letter-spacing:4px}
 ` : ''}</style></head><body>

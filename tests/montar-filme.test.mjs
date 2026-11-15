@@ -46,3 +46,10 @@ test('trilha opcional entra como áudio com a duração do filme', () => {
   const { html } = montarFilme({ ...SPEC, trilha: 'assets/trilha.mp3' }, { cupom: null });
   assert.match(html, /<audio[^>]*src="assets\/trilha\.mp3"[^>]*data-duration="9\.5"/);
 });
+
+test('cartão final: fundo claro por padrão e trocável no filme.json', () => {
+  const padrao = montarFilme(SPEC, { cupom: null }).html;
+  assert.match(padrao, /\.final\{[^}]*background:#efe9df/);
+  const escuro = montarFilme({ ...SPEC, final: { ...SPEC.final, fundo: '#0f1a2a' } }, { cupom: null }).html;
+  assert.match(escuro, /\.final\{[^}]*background:#0f1a2a/);
+});
