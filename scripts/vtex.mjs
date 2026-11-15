@@ -1,5 +1,7 @@
 // Busca produtos no site da Reserva pela API pública da VTEX (sem login, sem chave).
-// Uso: node scripts/vtex.mjs "bermuda linho" [--max 10] [--saida work/busca]
+// Uso: node scripts/vtex.mjs "bermuda linho" [--max 10] [--desconto 20] [--tam M] [--saida work/busca]
+//   --desconto N  só produtos com pelo menos N% de desconto
+//   --tam M       só produtos com esse tamanho disponível
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +20,28 @@ function dividirTermo(termo) {
   return { principal, resto: palavras.filter((p) => p !== principal) };
 }
 
+const ORDEM_ROUPA = ['RN', 'PP', 'P', 'M', 'G', 'GG', 'GGG', 'XG', 'XGG', 'EG', 'EGG', 'U', 'UN', 'UNICO'];
+
+export function ordenarTamanhos(tamanhos) {
+  const chave = (t) => {
+    const i = ORDEM_ROUPA.indexOf(normalizar(t.tam).toUpperCase());
+    if (i >= 0) return [0, i];
+    const n = parseFloat(String(t.tam).replace(',', '.'));
+    return Number.isFinite(n) ? [1, n] : [2, 0];
+  };
+  return [...tamanhos].sort((a, b) => {
+    const [ga, va] = chave(a);
+    const [gb, vb] = chave(b);
+    return ga - gb || va - vb;
+  });
+}
+
+export function filtrar(produtos, { minDesconto = 0, tam = null } = {}) {
+  const alvo = tam ? normalizar(tam) : null;
+  return produtos.filter((p) => p.desconto >= minDesconto
+    && (!alvo || p.tamanhos.some((t) => t.disponivel && normalizar(t.tam) === alvo)));
+}
+
 function resumir(produto) {
   const cores = new Set();
   const tamanhos = new Map();
@@ -31,12 +55,17 @@ function resumir(produto) {
     const tam = primeiro(item.Tamanho);
     if (cor) cores.add(cor);
     if (tam) tamanhos.set(tam, (tamanhos.get(tam) ?? false) || disponivel);
-    for (const img of item.images ?? []) if (img.imageUrl && !fotos.includes(img.imageUrl)) fotos.push(img.imageUrl);
+    for (const img of item.images ?? []) {
+      const nomeArq = img.imageUrl?.split('?')[0].split('/').pop();
+      if (nomeArq && !fotos.some((u) => u.split('?')[0].split('/').pop() === nomeArq)) fotos.push(img.imageUrl);
+    }
     if (Number.isFinite(oferta.Price) && oferta.Price > 0 && (precoPor === null || oferta.Price < precoPor)) {
       precoPor = oferta.Price;
       precoDe = Number.isFinite(oferta.ListPrice) ? Math.max(oferta.ListPrice, oferta.Price) : oferta.Price;
     }
   }
+  const numFoto = (u) => Number(u.split('?')[0].match(/_(\d+)\.\w+$/)?.[1] ?? 99);
+  fotos.sort((a, b) => numFoto(a) - numFoto(b));
   const desconto = precoDe && precoPor ? Math.round(((precoDe - precoPor) / precoDe) * 100) : 0;
   return {
     nome: produto.productName,
@@ -45,12 +74,12 @@ function resumir(produto) {
     precoPor: precoPor === null ? null : arred(precoPor),
     desconto,
     cores: [...cores],
-    tamanhos: [...tamanhos].map(([tam, disponivel]) => ({ tam, disponivel })),
+    tamanhos: ordenarTamanhos([...tamanhos].map(([tam, disponivel]) => ({ tam, disponivel }))),
     fotos,
   };
 }
 
-export async function buscar(termo, { max = 10, fetch: buscarUrl = globalThis.fetch } = {}) {
+export async function buscar(termo, { max = 10, minDesconto = 0, tam = null, fetch: buscarUrl = globalThis.fetch } = {}) {
   const { principal, resto } = dividirTermo(termo);
   if (!principal) throw new Error('Informe o que procurar, por exemplo: "bermuda linho".');
   const achados = [];
@@ -62,7 +91,7 @@ export async function buscar(termo, { max = 10, fetch: buscarUrl = globalThis.fe
     if (!Array.isArray(pagina) || pagina.length === 0) break;
     for (const p of pagina) {
       const nome = normalizar(p.productName);
-      if (resto.every((r) => nome.includes(r))) achados.push(resumir(p));
+      if (resto.every((r) => nome.includes(r))) achados.push(...filtrar([resumir(p)], { minDesconto, tam }));
       if (achados.length >= max) break;
     }
     if (pagina.length < POR_PAGINA) break;
@@ -77,8 +106,10 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const opc = (nome) => { const i = args.indexOf(nome); return i >= 0 ? args.splice(i, 2)[1] : null; };
   const max = Number(opc('--max') ?? 10);
   const saida = opc('--saida');
+  const minDesconto = Number(opc('--desconto') ?? 0);
+  const tam = opc('--tam');
   const termo = args.join(' ');
-  const produtos = await buscar(termo, { max });
+  const produtos = await buscar(termo, { max, minDesconto, tam });
   if (!produtos.length) console.log(`Nada encontrado para "${termo}". Tente outra palavra.`);
   produtos.forEach((p, i) => {
     const grade = p.tamanhos.map((t) => (t.disponivel ? t.tam : `~${t.tam}~`)).join(' ');

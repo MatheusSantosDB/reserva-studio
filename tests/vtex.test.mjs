@@ -49,3 +49,32 @@ test('sem desconto dá 0', async () => {
   const r = await buscar('sarja', { fetch: fetchFalso([]) });
   assert.equal(r.find((p) => p.nome === 'Bermuda Sarja Azul').desconto, 0);
 });
+
+import { filtrar, ordenarTamanhos } from '../scripts/vtex.mjs';
+
+const P = (nome, desconto, tamanhos) => ({ nome, desconto, tamanhos });
+
+test('filtra por desconto mínimo e tamanho disponível', () => {
+  const lista = [
+    P('a', 20, [{ tam: 'M', disponivel: true }]),
+    P('b', 0, [{ tam: 'M', disponivel: true }]),
+    P('c', 40, [{ tam: 'M', disponivel: false }, { tam: 'G', disponivel: true }]),
+  ];
+  assert.deepEqual(filtrar(lista, { minDesconto: 10, tam: 'm' }).map((p) => p.nome), ['a']);
+  assert.deepEqual(filtrar(lista, {}).map((p) => p.nome), ['a', 'b', 'c']);
+});
+
+test('ordena a grade de roupa e de calçado', () => {
+  const t = (xs) => ordenarTamanhos(xs.map((tam) => ({ tam, disponivel: true }))).map((x) => x.tam);
+  assert.deepEqual(t(['GGG', 'GG', 'G', 'M', 'P']), ['P', 'M', 'G', 'GG', 'GGG']);
+  assert.deepEqual(t(['42', '39', '40']), ['39', '40', '42']);
+  assert.deepEqual(t(['17/18', '13/14', '15/16']), ['13/14', '15/16', '17/18']);
+});
+
+test('fotos sem repetir (mesmo arquivo com ?v diferente) e em ordem', async () => {
+  const f = (n, v) => `https://img/ids/${v}/0100_0${n}.jpg?v=${v}`;
+  const fix = [{ productId: '9', productName: 'Polo Teste', link: 'x',
+    items: [sku('P', 'PRETO', 100, 100, 1, [f(2, 1), f(1, 1), f(4, 1)]), sku('M', 'PRETO', 100, 100, 1, [f(1, 2), f(4, 2), f(2, 2)])] }];
+  const r = await buscar('polo', { fetch: async () => ({ ok: true, status: 200, json: async () => fix }) });
+  assert.deepEqual(r[0].fotos.map((u) => u.split('/').pop().split('?')[0]), ['0100_01.jpg', '0100_02.jpg', '0100_04.jpg']);
+});

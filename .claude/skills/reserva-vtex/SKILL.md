@@ -11,6 +11,7 @@ O site da Reserva (www.usereserva.com) roda na VTEX, que tem uma busca pública:
 
 ```bash
 node scripts/vtex.mjs "bermuda linho" --max 10 --saida work/<tema>
+node scripts/vtex.mjs polo --desconto 20 --tam M --saida work/<tema>   # só com desconto e com M disponível
 ```
 
 - Imprime uma lista com nome, preço (de → por e %), cores, tamanhos (`~42~` = esgotado) e link. Também salva `work/<tema>/produtos.json` com as URLs das fotos.
