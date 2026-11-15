@@ -5,7 +5,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const IGNORAR = new Set(['.git', 'node_modules', 'work', 'entregas', 'originais']);
+const IGNORAR = new Set(['.git', 'node_modules', 'work', 'entregas', 'originais', '.hyperframes', '__pycache__', '.pytest_cache']);
 const ARQUIVOS_LOCAIS = new Set(['config/termos-proibidos.txt', 'config/vendedor.json', '.env']);
 const BINARIOS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.mp4', '.mov', '.mp3', '.wav',
   '.m4a', '.ttf', '.otf', '.woff', '.woff2', '.pdf', '.zip', '.ico']);
@@ -13,7 +13,7 @@ const BINARIOS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.mp4', '.mo
 const PADROES = [
   { termo: 'chave de API', re: /\b(sk-[A-Za-z0-9_-]{8,}|sk_[A-Za-z0-9]{8,}|gsk_[A-Za-z0-9]+|AIza[0-9A-Za-z_-]{20,}|xi-api-key\s*[:=]\s*\S+)/ },
   { termo: 'chave de API', re: /\b[A-Z0-9_]*(API_KEY|TOKEN|SECRET)\s*[=:]\s*["']?[A-Za-z0-9_\-]{8,}/ },
-  { termo: 'caminho pessoal', re: /\b[A-Z]:[\\/]|\/(Users|home)\/[^\s/]+|\/[a-z]\/Users\//i },
+  { termo: 'caminho pessoal', re: /\b[A-Z]:[\\/]+Users[\\/]|\b[D-Z]:[\\/]|\/(Users|home)\/[^\s/]+|\/[a-z]\/Users\//i },
 ];
 
 function escapar(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }

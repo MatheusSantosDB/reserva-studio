@@ -2,3 +2,5 @@ numpy
 pillow
 scipy
 opencv-python-headless
+faster-whisper
+yt-dlp

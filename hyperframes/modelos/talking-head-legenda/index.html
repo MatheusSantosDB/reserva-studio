@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="UTF-8"/><meta name="viewport" content="width=1080, height=1920"/>
+<!--
+  Talking head com legenda clássica (2 a 3 palavras, sem animação de palavra).
+  1. node scripts/preparar-fala.mjs <gravacao.mp4> <projeto>/assets/fala.mp4
+  2. node scripts/transcrever.mjs <projeto>/assets/fala.mp4 <projeto>/palavras.json   (revise os nomes!)
+  3. node scripts/legenda.mjs <projeto>/palavras.json > <projeto>/assets/legenda.js
+  4. Ajuste DURACAO abaixo e o data-duration do #root e do vídeo para a duração do fala.mp4.
+-->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script src="assets/legenda.js"></script>
+<style>
+@font-face{font-family:"Manrope";src:url("assets/Manrope-variable.ttf");font-weight:200 800}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+#root{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:"Manrope",Arial,sans-serif;color:#fff}
+.abs{position:absolute}
+#fala{left:0;top:0;width:1080px;height:1920px;object-fit:cover}
+.leg{left:90px;right:90px;bottom:330px;text-align:center;font-size:72px;font-weight:800;line-height:1.12;
+  text-shadow:0 0 8px rgba(0,0,0,.9),0 6px 18px rgba(0,0,0,.8);opacity:0;z-index:50}
+/* Inserções (foto oficial, print): use .cartao com data-start/data-duration pela fala real. */
+.cartao{left:80px;right:80px;top:120px;border-radius:24px;background:rgba(12,18,28,.9);padding:28px 32px;display:flex;gap:28px;align-items:center;opacity:0;z-index:40}
+</style></head><body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="12" data-width="1080" data-height="1920">
+<video id="fala" class="clip abs" src="assets/fala.mp4" data-start="0" data-duration="12" data-media-start="0" data-track-index="0" data-has-audio="true" playsinline></video>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+const root=document.getElementById("root");
+(window.LEGENDA||[]).forEach((g,i)=>{
+  const el=document.createElement("div");
+  el.className="abs leg";el.id="leg"+i;el.textContent=g.texto;
+  root.appendChild(el);
+  tl.set(el,{opacity:1},g.inicio);
+  tl.set(el,{opacity:0},g.fim);
+});
+window.__timelines=window.__timelines||{};window.__timelines["main"]=tl;tl.seek(0);
+</script></body></html>

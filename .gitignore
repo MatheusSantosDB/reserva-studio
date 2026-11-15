@@ -11,3 +11,10 @@ originais/
 *.mov
 node_modules/
 .superpowers/
+.hyperframes/
+__pycache__/
+.pytest_cache/
+hyperframes/modelos/*/assets/peca.png
+hyperframes/modelos/*/palavras.json
+hyperframes/modelos/*/assets/legenda.js
+hyperframes/projetos/

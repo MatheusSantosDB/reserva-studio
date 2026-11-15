@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="UTF-8"/><meta name="viewport" content="width=1080, height=1920"/>
+<!-- Gerado por scripts/montar-filme.mjs a partir do filme.json. Edite o filme.json e monte de novo. -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<style>
+@font-face{font-family:"Manrope";src:url("assets/Manrope-variable.ttf");font-weight:200 800}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+#root{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:"Manrope",Arial,sans-serif;color:#fff}
+.abs{position:absolute}
+.tela{left:0;top:0;width:1080px;height:1920px;object-fit:cover}
+.gancho{left:80px;right:80px;top:300px;text-align:center;font-size:76px;font-weight:800;line-height:1.1;text-shadow:0 4px 18px rgba(0,0,0,.8);z-index:30}
+.texto{left:80px;right:80px;bottom:360px;text-align:center;font-size:58px;font-weight:700;line-height:1.15;text-shadow:0 4px 16px rgba(0,0,0,.85);z-index:20}
+.final{left:0;top:0;width:1080px;height:1920px;background:#0f1a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:48px;z-index:40}
+#final-foto{max-width:720px;max-height:900px;object-fit:contain;filter:drop-shadow(0 30px 40px rgba(0,0,0,.45))}
+#final-titulo{font-size:64px;font-weight:800;text-transform:uppercase;letter-spacing:4px;text-align:center;padding:0 80px}
+</style></head><body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="13" data-width="1080" data-height="1920">
+<video id="take0" class="clip abs tela" src="assets/take1.mp4" data-start="0" data-duration="3.5" data-media-start="0" data-track-index="0" muted playsinline></video>
+<video id="take1" class="clip abs tela" src="assets/take2.mp4" data-start="3.5" data-duration="3" data-media-start="0" data-track-index="0" muted playsinline></video>
+<video id="take2" class="clip abs tela" src="assets/take3.mp4" data-start="6.5" data-duration="3.5" data-media-start="0" data-track-index="0" muted playsinline></video>
+<div id="txt1" class="clip abs texto" data-start="3.7" data-duration="2.7" data-track-index="2">Um absurdo só por cena</div>
+<div id="gancho" class="clip abs gancho" data-start="0" data-duration="2.5" data-track-index="3">E se este tênis fosse para 1985?</div>
+<div id="final" class="clip abs final" data-start="10" data-duration="3" data-track-index="4">
+  <img id="final-foto" src="assets/peca.png" alt=""/>
+  <div id="final-titulo">Nome do produto</div>
+  
+</div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.fromTo("#take0",{scale:1.06},{scale:1,duration:3.5,ease:"none"},0);
+tl.fromTo("#take1",{scale:1.06},{scale:1,duration:3,ease:"none"},3.5);
+tl.fromTo("#take2",{scale:1.06},{scale:1,duration:3.5,ease:"none"},6.5);
+tl.fromTo("#txt1",{opacity:0,y:20},{opacity:1,y:0,duration:.25,ease:"power3.out"},3.7);
+tl.fromTo("#gancho",{opacity:0,scale:.92},{opacity:1,scale:1,duration:.3,ease:"back.out(1.4)"},0);
+tl.fromTo("#final",{opacity:0},{opacity:1,duration:.3,ease:"power2.out"},10);
+tl.fromTo("#final-foto",{y:40,scale:.9},{y:0,scale:1,duration:.5,ease:"back.out(1.3)"},10);
+window.__timelines=window.__timelines||{};window.__timelines["main"]=tl;tl.seek(0);
+</script></body></html>

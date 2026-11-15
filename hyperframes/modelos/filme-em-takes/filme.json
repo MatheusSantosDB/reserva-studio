@@ -1,0 +1,10 @@
+{
+  "bpm": 120,
+  "gancho": "E se este tênis fosse para 1985?",
+  "takes": [
+    { "arquivo": "assets/take1.mp4", "duracao": 3.5 },
+    { "arquivo": "assets/take2.mp4", "duracao": 3, "texto": "Um absurdo só por cena" },
+    { "arquivo": "assets/take3.mp4", "duracao": 3.5 }
+  ],
+  "final": { "titulo": "Nome do produto", "foto": "assets/peca.png", "duracao": 3 }
+}

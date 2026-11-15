@@ -7,6 +7,7 @@ O que o estúdio faz:
 - monta roteiros;
 - gera imagens e vídeos de IA (Google Flow ou Magnific);
 - grava voz sintética;
+- assiste e analisa vídeos e imagens de referência (sem chave de API);
 - edita o vídeo final em **HyperFrames**: vídeo feito como página HTML e animado com GSAP.
 
 ## Antes de tudo
@@ -19,6 +20,7 @@ O que o estúdio faz:
 | Pedido | Skill |
 |---|---|
 | Achar produto, preço, cores, tamanhos, foto oficial | `/reserva-vtex` |
+| Analisar um vídeo (link ou arquivo) ou imagem de referência | `/watch` |
 | Editar, montar ou renderizar qualquer vídeo | `/editar-com-hyperframes` |
 | Filme de IA em que personagens levam o produto a outra época ou lugar | `/filme-de-epocas` |
 | Escrever o prompt de uma imagem realista | `/imagem-realista` |

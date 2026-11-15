@@ -18,6 +18,7 @@ Você pede em português ("faz um filme com o tênis X") e o Claude:
 | [Claude Code](https://claude.com/claude-code) | o "editor" que conversa com você | plano do Claude |
 | [Node.js 22](https://nodejs.org) | roda os modelos de vídeo | grátis |
 | [FFmpeg](https://ffmpeg.org/download.html) | junta áudio e vídeo | grátis |
+| [Python 3.10+](https://www.python.org/downloads/) | recorte de mockup, transcrição e análise de vídeo | grátis |
 | Google Flow (conta Google) | gerar imagens e vídeos de IA | créditos da sua conta |
 | Magnific (opcional) | vídeos de IA ilimitados em alguns modelos | assinatura |
 | ElevenLabs (opcional) | voz mais natural | plano gratuito |
@@ -32,14 +33,17 @@ Para conferir, rode `ffmpeg -version`. Se aparecer a versão, está pronto.
 ## Primeiros passos
 
 1. Baixe esta pasta (botão **Code → Download ZIP**, ou `git clone`).
-2. Copie `config/vendedor.example.json` para `config/vendedor.json` e preencha o seu cupom e o seu @. Esse arquivo fica só no seu computador.
-3. Abra a pasta no Claude Code.
-4. Peça, por exemplo:
+2. No terminal, dentro da pasta: `pip install -r requirements.txt` e `python -m pip install -U yt-dlp`.
+3. Copie `config/vendedor.example.json` para `config/vendedor.json` e preencha o seu cupom e o seu @. Esse arquivo fica só no seu computador.
+4. Abra a pasta no Claude Code.
+5. Peça, por exemplo:
 
 > Busca a bermuda de linho no site da Reserva e faz um filme de épocas de 30 segundos com ela. Me mostra o roteiro antes.
 
 ## O que tem aqui
 
+- **Nenhuma chave de API é obrigatória.** Busca, edição, transcrição, voz Edge e análise de vídeo rodam de graça no seu computador. O Flow usa os créditos da sua conta Google; Magnific e ElevenLabs são opcionais.
+- **Análise de vídeos e imagens** (`/watch`): mande um link do YouTube, Instagram ou TikTok, ou um arquivo, e o Claude assiste, transcreve e explica o gancho e a edição.
 - **Busca de produtos** no site da Reserva (sem senha, só o que já é público).
 - **Filme de épocas:** personagens levam o produto para outra época, em takes curtos na batida da música.
 - **Imagens realistas**, com cara de foto de celular, não de "IA perfeita".

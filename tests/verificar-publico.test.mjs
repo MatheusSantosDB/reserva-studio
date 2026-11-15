@@ -38,6 +38,16 @@ test('acha caminho pessoal do Windows', () => {
   assert.ok(termos(r).includes('caminho pessoal'));
 });
 
+test('caminho genérico de ferramenta não é pessoal', () => {
+  const r = varrer(pasta({ 't.py': 'x = "C:/tools/ffmpeg/bin/ffprobe.exe"' }));
+  assert.deepEqual(r.achados, []);
+});
+
+test('pasta de usuário do Windows é pessoal', () => {
+  const r = varrer(pasta({ 't.py': 'x = "C:' + '/Use' + 'rs/fulano/x"' }));
+  assert.ok(termos(r).includes('caminho pessoal'));
+});
+
 test('arquivos limpos não geram achado', () => {
   const r = varrer(pasta({
     '.gitignore': 'config/vendedor.json\n.env\n',
