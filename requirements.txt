@@ -4,3 +4,4 @@ scipy
 opencv-python-headless
 faster-whisper
 yt-dlp
+edge-tts
