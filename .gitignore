@@ -1,0 +1,13 @@
+# Seus dados (nunca vão para o git)
+config/vendedor.json
+config/termos-proibidos.txt
+.env
+
+# Trabalho e entregas
+work/
+entregas/
+originais/
+*.mp4
+*.mov
+node_modules/
+.superpowers/

@@ -1,0 +1,12 @@
+{
+  "name": "reserva-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Estúdio de edição de vídeo para vendedores da Reserva, feito para usar com o Claude Code.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "verificar": "node scripts/verificar-publico.mjs"
+  },
+  "engines": { "node": ">=22" }
+}
