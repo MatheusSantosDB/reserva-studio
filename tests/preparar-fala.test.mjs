@@ -47,3 +47,44 @@ test('transcrever com arquivo que não existe avisa', () => {
   assert.equal(r.status, 1);
   assert.match(r.stderr, /não encontrado/);
 });
+
+import { intervalosPoda, subtrair } from '../scripts/preparar-fala.mjs';
+
+test('modo seco: pausa de 0,3 s vira ~0,06 s', () => {
+  const t = planejarCortes([{ inicio: 3, fim: 3.3 }], 10, { seco: true });
+  assert.equal(t.length, 2);
+  const sobra = (t[0].fim - 3) + (3.3 - t[1].inicio);
+  assert.ok(Math.abs(sobra - 0.06) < 0.034, `sobrou ${sobra}`);
+});
+
+test('modo seco: pausa de 0,13 s também sai (normal deixaria)', () => {
+  assert.equal(planejarCortes([{ inicio: 3, fim: 3.13 }], 10).length, 1);
+  assert.equal(planejarCortes([{ inicio: 3, fim: 3.13 }], 10, { seco: true }).length, 2);
+});
+
+test('modo seco: tira o silêncio do começo e do fim', () => {
+  const t = planejarCortes([{ inicio: 0, fim: 0.8 }, { inicio: 9.2, fim: 10 }], 10, { seco: true });
+  assert.ok(t[0].inicio >= 0.7 && t[0].inicio <= 0.8, `começa em ${t[0].inicio}`);
+  assert.ok(t.at(-1).fim >= 9.2 && t.at(-1).fim <= 9.3, `termina em ${t.at(-1).fim}`);
+});
+
+const PAL = [
+  { text: 'essa', start: 0.0, end: 0.3 }, { text: 'jaqueta', start: 0.4, end: 0.9 },
+  { text: 'essa', start: 1.3, end: 1.5 }, { text: 'jaqueta', start: 1.6, end: 2.0 },
+  { text: 'é', start: 2.4, end: 2.5 }, { text: 'leve', start: 2.6, end: 3.0 },
+];
+
+test('poda corta pelo meio dos silêncios em volta das palavras', () => {
+  const [r] = intervalosPoda(PAL, '2-3');
+  assert.ok(r.inicio > 0.9 && r.inicio < 1.3, `início ${r.inicio}`);
+  assert.ok(r.fim > 2.0 && r.fim < 2.4, `fim ${r.fim}`);
+});
+
+test('poda rejeita índice fora da lista', () => {
+  assert.throws(() => intervalosPoda(PAL, '4-9'), /palavra/);
+});
+
+test('subtrair tira o trecho podado dos trechos mantidos', () => {
+  const t = subtrair([{ inicio: 0, fim: 10 }], [{ inicio: 2, fim: 4 }]);
+  assert.deepEqual(t, [{ inicio: 0, fim: 2 }, { inicio: 4, fim: 10 }]);
+});

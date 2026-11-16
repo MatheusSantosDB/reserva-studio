@@ -18,3 +18,6 @@ hyperframes/modelos/*/assets/peca.png
 hyperframes/modelos/*/palavras.json
 hyperframes/modelos/*/assets/legenda.js
 hyperframes/projetos/
+assets/broll/*
+!assets/broll/LEIA.md
+hyperframes/modelos/*/popups.json

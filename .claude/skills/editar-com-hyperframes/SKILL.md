@@ -28,6 +28,8 @@ hyperframes/
 
 ## Talking head com legenda
 
+Acabamento padrão: `/edicao-sem-slop` (modo seco, poda e pop-up parado). Fala ilustrada com desenhos: `/reserva-explica`.
+
 ```bash
 node scripts/preparar-fala.mjs <gravacao.mp4> hyperframes/projetos/<nome>/assets/fala.mp4
 node scripts/transcrever.mjs hyperframes/projetos/<nome>/assets/fala.mp4 hyperframes/projetos/<nome>/palavras.json --ate 15   # amostra
