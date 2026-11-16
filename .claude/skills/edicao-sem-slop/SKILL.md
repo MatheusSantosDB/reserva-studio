@@ -40,3 +40,21 @@ description: Use ao editar talking head ou qualquer Reel do vendedor quando ele 
 - Print com dado pessoal (nome, CPF, e-mail, endereço): recorte antes de usar.
 - Peça em pop-up = mockup oficial sem fundo. Imagem de IA só se o vendedor pedir.
 - Para a fala ilustrada com desenhos, use `/reserva-explica`, que segue as mesmas regras.
+
+## Inserções de tutorial (quando o vídeo ensina a usar uma ferramenta)
+
+Só o rosto falando cansa. Para cada coisa que o vendedor **cita**, mostre aquilo na tela. Monte um mapa "fala → inserção" e mostre antes de produzir.
+
+| Quando ele fala | Inserção |
+|---|---|
+| "passo a passo", "primeiro passo" | Cartões numerados que vão se acendendo (1, 2, 3) |
+| o nome da ferramenta ou "pedi pro Claude" | Tela do Claude Code simulada com **o pedido real** que ele digitou, sendo digitado, e as tarefas sendo marcadas |
+| "peguei uma referência", "colei o link" | Simulação: imagem do Pinterest → arrastada para o Claude → link copiado e colado → pedido digitado → Claude trabalhando |
+| "por áudio" | Balão de mensagem de voz com a onda sonora |
+| Instagram, TikTok, YouTube | Logo **oficial** (Wikimedia Commons), um por palavra |
+| "o repositório", um site | Print real da página |
+| um tipo de vídeo ("animado", "histórico", "vlog") | O vídeo pronto desse estilo, em tela cheia com o rosto num círculo |
+
+- Os pedidos que aparecem na tela vêm das sessões reais (o vendedor pode reconhecê-los). Não invente resultado.
+- Referência do Pinterest **sem pessoa real e sem personagem que lembre famoso:** prefira paisagem, cenário ou produto.
+- O movimento continua curto e reto (entra deslizando 0,2 s, sai em corte). Nada quica.

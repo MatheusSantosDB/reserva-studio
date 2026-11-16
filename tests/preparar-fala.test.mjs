@@ -88,3 +88,13 @@ test('subtrair tira o trecho podado dos trechos mantidos', () => {
   const t = subtrair([{ inicio: 0, fim: 10 }], [{ inicio: 2, fim: 4 }]);
   assert.deepEqual(t, [{ inicio: 0, fim: 2 }, { inicio: 4, fim: 10 }]);
 });
+
+test('pré-passe: girar, acelerar e clarear montam os filtros certos', async () => {
+  const { filtrosPrepasse } = await import('../scripts/preparar-fala.mjs');
+  assert.deepEqual(filtrosPrepasse(), { video: '', audio: '' });
+  const f = filtrosPrepasse({ girar: 'anti', velocidade: 1.2, luz: true });
+  assert.ok(f.video.startsWith('transpose=2,setpts=PTS/1.2,fps=30,eq='));
+  assert.equal(f.audio, 'atempo=1.2');
+  assert.equal(filtrosPrepasse({ girar: 'horario' }).video, 'transpose=1');
+  assert.throws(() => filtrosPrepasse({ girar: 'cima' }));
+});

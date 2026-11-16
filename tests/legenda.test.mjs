@@ -31,3 +31,9 @@ test('grupo vai até o início do próximo, sem buraco curto', () => {
   assert.equal(g[0].inicio, 0);
   assert.equal(g[0].fim, g[1].inicio);
 });
+
+test('palavra com fim antes do início não deixa legenda presa', () => {
+  const g = agrupar([{ text: 'Claude', start: 5.0, end: 4.98 }, { text: 'agora', start: 5.5, end: 5.8 }]);
+  for (const x of g) assert.ok(x.fim > x.inicio, `${x.texto}: ${x.inicio} → ${x.fim}`);
+  assert.ok(g[0].fim <= g[1].inicio);
+});

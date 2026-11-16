@@ -45,3 +45,21 @@ Para conferir: peça "mostra meu saldo do Magnific" (ferramenta de saldo/conta d
 - Imagem grande para upload: converta antes para JPEG 720×1280. PNG pesado demora ou falha.
 - Prompt curto e direto funciona melhor que um parágrafo longo.
 - Ao responder ao vendedor, diga o nome e o link (webUrl) da criação, não o identificador interno.
+
+## Trocar roupa e cenário de uma gravação (motion control)
+
+Para "mudar de cenário" num trecho do talking head sem regravar (ex.: no estalo de dedo):
+
+1. **Foto do novo visual primeiro** (~65 créditos cada): `images_generate` com um quadro nítido do rosto do vendedor como referência `image` e o prompt do cenário e da roupa. Gere 3 ou 4 propostas e deixe o vendedor escolher. Roupa **sem logo** (peça da Reserva nunca é gerada por IA) e ninguém mais na cena.
+2. **Recorte o trecho** da fala em vertical (720×1280) e suba como vídeo (`creations_request_upload` → PUT → `creations_finalize_upload`).
+3. **Gere e compare no mesmo take** antes de fazer o resto. Comparativo feito em nov/2026 (10 s, 720p):
+
+   | Modelo | Custo | Resultado |
+   |---|---|---|
+   | **Gemini Omni 1.2 Flash** | ~140/s | **O preferido:** mais natural. Vídeo de referência de no máximo 10 s |
+   | Kling 4.0 Omni | ~220/s | Segue os gestos de perto, mas fica menos natural |
+   | Kling 3.0 Motion Control | ~110/s | "Engessado": gestos repetitivos |
+
+   Omni 1.2 e Kling 4.0 Omni: `references` = imagem do novo visual + vídeo do trecho. Kling 3.0 Motion Control: `keyframes.start` = imagem e `keyframes.video` = vídeo.
+4. Monte um **lado a lado com o áudio original** (ffmpeg `hstack`) para o vendedor julgar a boca e os gestos.
+5. No vídeo final, o clipe gerado entra **mudo** por cima da fala original e **volta para a gravação** no fim de uma frase. Use só no trecho da demonstração: o vídeo inteiro custa caro e cansa.

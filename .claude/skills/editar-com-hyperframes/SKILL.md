@@ -70,3 +70,16 @@ No Windows sem Git Bash, use `hyperframes\hf.cmd` no lugar de `./hyperframes/hf.
 - Easings: entrada `power3.out`, saída `power2.in`, "pop" `back.out(1.3)`.
 - Versão fixa: `hyperframes@0.8.225`. Documentação: `npx hyperframes@0.8.225 docs <tópico>` ou https://hyperframes.heygen.com/llms.txt.
 - Renderize um vídeo de cada vez: dois renders juntos disputam o computador.
+
+## Lições do talking head dinâmico (Reels de ~3 min)
+
+- **Gravação de lado ou escura:** `preparar-fala.mjs --girar anti --velocidade 1.2 --luz --manter --seco`. O `--manter` deixa a imagem deitada para a edição recortar enquadramentos diferentes do mesmo vídeo.
+- **Enquadramentos de um vídeo só:** ponha a fala dentro de uma "janela" (`div` com `overflow:hidden`) e troque posição e escala do vídeo por trecho: rosto em tela cheia, zoom seco, tela dividida (rosto em cima, inserção embaixo), círculo sobre uma inserção em tela cheia. Centralize o recorte no rosto de cada trecho (detector de rosto do MediaPipe) e evite a moldura de app de câmera ("REC") nas bordas.
+- **`.clip` dá caixa de tela cheia:** um `<video class="clip">` dentro de uma janela precisa de `width/height` com `!important` para manter o tamanho real.
+- **`fromTo` de elemento que entra depois:** use `immediateRender:false`; sem isso, o estado inicial (ex.: `opacity:0`) vale desde o segundo 0 e o elemento some antes da hora.
+- **Nada de `className` no `tl.set`:** mude as propriedades direto (cor, fundo).
+- **Fonte de sistema** (ex.: monoespaçada da tela do Claude Code): declare `@font-face{font-family:"Mono";src:local("Consolas")}`, senão o lint reclama e o render troca a fonte.
+- **Gerador fora do projeto:** se o `index.html` é gerado de um modelo, deixe o modelo fora da pasta do projeto (dois HTML com `data-composition-id` na mesma pasta = erro de "múltiplas composições").
+- **Transcrição do vídeo inteiro:** `transcrever.mjs --groq` (segundos). Revise nomes ("Cloud Code" → Claude Code).
+- **Tempo de render:** ~3 min de vídeo com muitas inserções levou 30 a 47 min. Confira tudo com `snapshot` antes e renderize um de cada vez. Para trocar só o áudio, refaça a mixagem no ffmpeg com `-c:v copy`, sem renderizar de novo.
+- **Trilha sonora:** não ponha por padrão. Trilha gerada de 30 s repetida embaixo da voz foi reprovada pelo vendedor. Se ele quiser música, deixe que ele escolha a faixa.

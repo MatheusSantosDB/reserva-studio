@@ -1,8 +1,14 @@
 // Prepara a gravação de talking head: vertical 1080x1920 30 fps, áudio mono nos dois lados
 // e normalizado (~-14 LUFS), e pausas cortadas (acima de 0,16 s ficam 0,10 s; fim de frase 0,14 s).
 // Uso: node scripts/preparar-fala.mjs <gravacao.mp4> <saida.mp4> [--seco] [--palavras p.json --cortar "12-18,40-44"]
+//        [--manter] [--girar anti|horario] [--velocidade 1.2] [--luz]
 //   --seco     edição "sem cara de IA": pausa a partir de 0,12 s vira 0,06 s e sai o silêncio do começo e do fim
 //   --cortar   tira frases (índices de palavra, contando de 0, do palavras.json do BRUTO); o corte cai no silêncio
+//   --manter   não recorta para 1080x1920 (edições que usam a imagem deitada: tela dividida, círculo, recorte no rosto)
+//   --girar    gravação de lado (celular deitado com a imagem em pé no arquivo): anti = 90° anti-horário, horario = 90° horário
+//   --velocidade acelera fala e imagem (ex.: 1.2). O palavras.json do --cortar pode ser o da gravação original:
+//              os tempos são divididos pela velocidade sozinhos.
+//   --luz      clareia gravação escura (rosto mais aceso, pele quente, sem estourar o fundo)
 // Depois: node scripts/transcrever.mjs <saida.mp4> palavras.json
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync } from 'node:fs';
@@ -24,6 +30,18 @@ function juntarSilencios(silencios) {
     else out.push({ ...s });
   }
   return out;
+}
+
+// Filtros do pré-passe (girar, acelerar, clarear). Vazio = não precisa de pré-passe.
+export const LUZ = "eq=gamma=1.12:contrast=1.14:saturation=1.22,curves=master='0/0 0.12/0.15 0.35/0.46 0.7/0.8 1/1',colorbalance=rs=0.04:gs=0.01:bs=-0.03:rm=0.03:bm=-0.02";
+export function filtrosPrepasse({ girar = null, velocidade = 1, luz = false } = {}) {
+  const v = [];
+  if (girar === 'anti') v.push('transpose=2');
+  else if (girar === 'horario') v.push('transpose=1');
+  else if (girar) throw new Error(`--girar aceita "anti" ou "horario" (veio "${girar}").`);
+  if (velocidade !== 1) v.push(`setpts=PTS/${velocidade}`, 'fps=30');
+  if (luz) v.push(LUZ);
+  return { video: v.join(','), audio: velocidade !== 1 ? `atempo=${velocidade}` : '' };
 }
 
 export function planejarCortes(silencios, duracao, { seco = false } = {}) {
@@ -92,9 +110,25 @@ if (ehPrincipal(import.meta.url)) {
   const arqPalavras = opc('--palavras');
   const faixas = opc('--cortar');
   if (faixas && !arqPalavras) { console.error('--cortar precisa de --palavras <palavras.json do bruto>.'); process.exit(1); }
-  const [entrada, saida] = argv.filter((a, i) => !a.startsWith('--') && !['--palavras', '--cortar'].includes(argv[i - 1]));
+  const girar = opc('--girar');
+  const velocidade = opc('--velocidade') ? Number(opc('--velocidade')) : 1;
+  const luz = argv.includes('--luz');
+  if (!(velocidade > 0.5 && velocidade <= 2)) { console.error('--velocidade vai de 0.5 a 2 (ex.: 1.2).'); process.exit(1); }
+  let [entrada, saida] = argv.filter((a, i) => !a.startsWith('--') && !['--palavras', '--cortar', '--girar', '--velocidade'].includes(argv[i - 1]));
   if (!entrada || !saida) { console.error('Uso: node scripts/preparar-fala.mjs <gravacao.mp4> <saida.mp4> [--manter] [--seco] [--palavras p.json --cortar "a-b"]'); process.exit(1); }
   const ff = ffmpeg();
+  // 0) pré-passe opcional: girar, acelerar e clarear antes de medir as pausas
+  const pre = filtrosPrepasse({ girar, velocidade, luz });
+  if (pre.video || pre.audio) {
+    const tmp = join(mkdtempSync(join(tmpdir(), 'rs-pre-')), 'pre.mp4');
+    const a = ['-y', '-loglevel', 'error', '-i', entrada];
+    if (pre.video) a.push('-vf', pre.video);
+    if (pre.audio) a.push('-af', pre.audio);
+    a.push('-c:v', 'libx264', '-crf', '16', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', tmp);
+    const r0 = spawnSync(ff, a, { stdio: 'inherit' });
+    if (r0.status !== 0) process.exit(r0.status ?? 1);
+    entrada = tmp;
+  }
   // 1) áudio mono e normalizado primeiro: as pausas são medidas já no nível final
   const voz = join(mkdtempSync(join(tmpdir(), 'rs-fala-')), 'voz.wav');
   const n = spawnSync(ff, ['-y', '-loglevel', 'error', '-i', entrada, '-vn', '-af',
@@ -103,7 +137,9 @@ if (ehPrincipal(import.meta.url)) {
   const { lista, duracao } = silencios(ff, voz);
   let trechos = planejarCortes(lista, duracao, { seco });
   if (faixas) {
-    const remover = intervalosPoda(JSON.parse(readFileSync(arqPalavras, 'utf8')), faixas);
+    const brutas = JSON.parse(readFileSync(arqPalavras, 'utf8'));
+    const pal = velocidade === 1 ? brutas : brutas.map((w) => ({ ...w, start: w.start / velocidade, end: w.end / velocidade }));
+    const remover = intervalosPoda(pal, faixas);
     trechos = subtrair(trechos, remover);
     console.log(`Poda: ${remover.length} trecho(s) removido(s), ${remover.reduce((s, r) => s + r.fim - r.inicio, 0).toFixed(1)} s.`);
   }

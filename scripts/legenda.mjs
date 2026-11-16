@@ -27,7 +27,10 @@ export function agrupar(palavras) {
     const inicio = g[0].start;
     const fimFala = g[g.length - 1].end;
     const prox = grupos[i + 1]?.[0].start;
-    const fim = prox !== undefined && prox - fimFala <= EMENDA ? prox : fimFala + 0.2;
+    let fim = prox !== undefined && prox - fimFala <= EMENDA ? prox : fimFala + 0.2;
+    // transcrição por API às vezes devolve palavra com fim antes do início: a legenda ficaria presa na tela
+    if (fim <= inicio + 0.05) fim = Math.min(inicio + 0.6, prox ?? inicio + 0.6);
+    if (prox !== undefined && fim > prox) fim = prox;
     const r3 = (x) => Math.round(x * 1000) / 1000;
     return { texto: g.map((w) => w.text).join(' '), inicio: r3(inicio), fim: r3(fim) };
   });
