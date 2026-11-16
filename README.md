@@ -50,6 +50,8 @@ Para conferir, rode `ffmpeg -version`. Se aparecer a versão, está pronto.
 - **Google Flow e Magnific** dirigidos pelo Claude, que sempre pergunta antes de gastar crédito.
 - **Voz sintética** grátis (Edge) ou ElevenLabs.
 - **Modelos de edição** em HyperFrames: filme em takes, talking head com legenda, carrossel e story.
+- **Edição sem cara de IA:** legenda clássica, pausas cortadas a ~0,1 s, poda de frases repetidas e pop-ups parados com imagem real.
+- **Reserva Explica:** a sua fala ilustrada por cenas de desenho (loja, clientes, produto real, etiqueta, cupom).
 
 ## Regras que o estúdio segue
 

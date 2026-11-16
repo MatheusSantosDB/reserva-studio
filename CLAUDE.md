@@ -22,6 +22,8 @@ O que o estúdio faz:
 | Achar produto, preço, cores, tamanhos, foto oficial | `/reserva-vtex` |
 | Analisar um vídeo (link ou arquivo) ou imagem de referência | `/watch` |
 | Editar, montar ou renderizar qualquer vídeo | `/editar-com-hyperframes` |
+| Talking head "sem cara de IA" (padrão em toda edição de fala) | `/edicao-sem-slop` |
+| Fala ilustrada com desenhos de papel-recorte | `/reserva-explica` |
 | Filme de IA em que personagens levam o produto a outra época ou lugar | `/filme-de-epocas` |
 | Escrever o prompt de uma imagem realista | `/imagem-realista` |
 | Gerar imagem ou vídeo no Google Flow (pelo navegador) | `/flow-no-navegador` |
